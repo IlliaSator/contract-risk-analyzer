@@ -14,15 +14,28 @@ Primary target data is LexGLUE LEDGAR prepared locally through the data pipeline
 
 ## Evaluation Data
 
-Use LEDGAR validation and test splits after local download. Metrics are not committed unless generated locally by the user.
+Use LEDGAR validation and test splits after local download. The latest local run used:
+
+- train: `60,000` LEDGAR records
+- validation: `10,000` LEDGAR records
+- test: `10,000` LEDGAR records
 
 ## Metrics
 
 Supported metrics include accuracy, macro F1, micro F1, weighted F1, per-class precision/recall/F1, confusion matrix, and top confusing label pairs.
 
+Latest local TF-IDF baseline metrics:
+
+- validation macro F1: `0.7737`
+- test accuracy: `0.8307`
+- test macro F1: `0.7826`
+- test weighted F1: `0.8332`
+
 ## Limitations
 
 Legal clause labels can be ambiguous. Rare classes may perform poorly. Long provisions may require truncation. Out-of-domain contracts and jurisdiction-specific wording can reduce reliability.
+
+The current trained baseline is English-domain only. It should not be treated as a validated model for Russian-language, Belarusian-language, Belarusian-law, or Russian-law contracts.
 
 ## Ethical Considerations
 
@@ -43,6 +56,8 @@ All risk flags, predictions, and reports require review by qualified humans befo
 - Over-flagging boilerplate
 - Underperforming on rare labels
 - Misleading confidence on unfamiliar documents
+- Weak behavior on non-English legal text
+- Poor transfer to Belarusian or Russian contract drafting without local training and evaluation data
 
 ## Monitoring Recommendations
 

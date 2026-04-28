@@ -92,6 +92,8 @@ python scripts/evaluate_model.py --config configs/baseline.yaml --model models/b
 
 The trained model, processed dataset files, and generated reports are not committed. They are local artifacts and are ignored by Git.
 
+Additional local latency and model-size measurements are documented in [docs/benchmark_report.md](docs/benchmark_report.md).
+
 ## Will It Work For Belarusian Or Russian Documents?
 
 Technically, the service will accept any text. Practically, the trained baseline should **not** be treated as reliable for Belarusian or Russian contracts.
@@ -129,6 +131,8 @@ python scripts/analyze_document.py \
 ```
 
 The report contains the document id, predicted clause types, risk flags, severity breakdown, recommendations, overall score, and the legal disclaimer.
+
+A shortened model-backed report example is available in [docs/example_risk_report.md](docs/example_risk_report.md).
 
 ## API
 
@@ -292,6 +296,8 @@ python scripts/evaluate_model.py --config configs/baseline.yaml --model models/b
 
 Обученная модель, processed dataset files и generated reports не коммитятся. Это локальные артефакты, они игнорируются Git.
 
+Дополнительные latency-замеры и размер модели описаны в [docs/benchmark_report.md](docs/benchmark_report.md).
+
 ## Будет Ли Это Работать С Документами Беларуси Или России?
 
 Технически сервис примет любой текст. Практически текущий baseline **нельзя считать надежным** для белорусских или российских договоров.
@@ -329,6 +335,8 @@ python scripts/analyze_document.py \
 ```
 
 Отчет содержит document id, predicted clause types, risk flags, severity breakdown, recommendations, overall score и legal disclaimer.
+
+Короткий пример model-backed отчета есть в [docs/example_risk_report.md](docs/example_risk_report.md).
 
 ## API
 
