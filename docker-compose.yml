@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    image: contract-risk-analyzer:local
+    environment:
+      CONTRACT_RISK_MOCK_MODEL: "true"
+      CONTRACT_RISK_MODEL_PATH: /app/models/baseline_tfidf.joblib
+      CONTRACT_RISK_RETRIEVAL_INDEX: /app/models/retrieval
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
