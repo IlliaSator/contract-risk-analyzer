@@ -1,4 +1,7 @@
-from contract_risk_analyzer.modeling.baseline_tfidf import TfidfBaselineConfig, TfidfLogisticBaseline
+from contract_risk_analyzer.modeling.baseline_tfidf import (
+    TfidfBaselineConfig,
+    TfidfLogisticBaseline,
+)
 
 
 def test_baseline_can_fit_tiny_sample() -> None:

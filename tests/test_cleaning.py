@@ -1,4 +1,8 @@
-from contract_risk_analyzer.preprocessing.cleaning import clean_legal_text, normalize_whitespace, remove_control_chars
+from contract_risk_analyzer.preprocessing.cleaning import (
+    clean_legal_text,
+    normalize_whitespace,
+    remove_control_chars,
+)
 
 
 def test_normalize_whitespace() -> None:

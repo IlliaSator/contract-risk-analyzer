@@ -9,7 +9,6 @@ from contract_risk_analyzer.modeling.registry import load_local_model
 from contract_risk_analyzer.preprocessing.chunking import split_into_clauses
 from contract_risk_analyzer.risk.report import generate_risk_report
 
-
 MOCK_LABEL_KEYWORDS = {
     "termination": ["terminate", "termination", "breach", "notice"],
     "confidentiality": ["confidential", "secret", "non-disclosure"],

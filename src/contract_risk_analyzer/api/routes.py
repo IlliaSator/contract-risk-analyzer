@@ -23,7 +23,6 @@ from contract_risk_analyzer.retrieval.search import search_index
 from contract_risk_analyzer.risk.rules import detect_risk_flags
 from contract_risk_analyzer.utils.io import read_jsonl
 
-
 router = APIRouter()
 
 

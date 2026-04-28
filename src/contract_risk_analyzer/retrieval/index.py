@@ -47,7 +47,7 @@ class ClauseIndex:
         return target
 
     @classmethod
-    def load(cls, path: str | Path) -> "ClauseIndex":
+    def load(cls, path: str | Path) -> ClauseIndex:
         payload = joblib.load(path)
         if not isinstance(payload, cls):
             raise TypeError(f"Unsupported retrieval index artifact: {path}")

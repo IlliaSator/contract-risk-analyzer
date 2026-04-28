@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from contract_risk_analyzer.api.routes import router
 from contract_risk_analyzer.config.settings import load_yaml
 
-
 config = load_yaml("configs/api.yaml")
 
 app = FastAPI(

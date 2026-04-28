@@ -6,7 +6,6 @@ from typing import Any
 
 from contract_risk_analyzer.utils.io import read_jsonl
 
-
 REQUIRED_FIELDS = {"text", "label", "split", "source"}
 
 

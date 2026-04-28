@@ -28,7 +28,7 @@ def load_rules(config_path: str = "configs/risk_rules.yaml") -> list[RiskRule]:
 
 
 def _stable_flag_id(clause_id: str, flag_type: str, evidence: str) -> str:
-    digest = hashlib.sha1(f"{clause_id}:{flag_type}:{evidence}".encode("utf-8")).hexdigest()[:10]
+    digest = hashlib.sha1(f"{clause_id}:{flag_type}:{evidence}".encode()).hexdigest()[:10]
     return f"flag-{digest}"
 
 

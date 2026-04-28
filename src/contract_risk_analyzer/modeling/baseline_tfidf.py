@@ -53,7 +53,7 @@ class TfidfLogisticBaseline:
     def classes_(self) -> np.ndarray:
         return self.pipeline.named_steps["classifier"].classes_
 
-    def fit(self, texts: list[str], labels: list[str]) -> "TfidfLogisticBaseline":
+    def fit(self, texts: list[str], labels: list[str]) -> TfidfLogisticBaseline:
         if not texts or not labels:
             raise ValueError("Training data is empty.")
         if len(set(labels)) < 2:
@@ -93,7 +93,7 @@ class TfidfLogisticBaseline:
         joblib.dump({"model": self, "model_name": self.model_name, "config": self.config}, path)
 
     @classmethod
-    def load(cls, path: str) -> "TfidfLogisticBaseline":
+    def load(cls, path: str) -> TfidfLogisticBaseline:
         payload: Any = joblib.load(path)
         if isinstance(payload, cls):
             return payload

@@ -4,7 +4,10 @@ from pathlib import Path
 from typing import Any
 
 from contract_risk_analyzer.config.settings import load_yaml, resolve_path
-from contract_risk_analyzer.modeling.baseline_tfidf import TfidfBaselineConfig, TfidfLogisticBaseline
+from contract_risk_analyzer.modeling.baseline_tfidf import (
+    TfidfBaselineConfig,
+    TfidfLogisticBaseline,
+)
 from contract_risk_analyzer.utils.io import ensure_parent, read_jsonl, write_json
 from contract_risk_analyzer.utils.reproducibility import set_seed
 

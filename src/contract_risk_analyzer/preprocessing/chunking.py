@@ -5,7 +5,6 @@ import re
 from contract_risk_analyzer.data.schemas import Clause
 from contract_risk_analyzer.preprocessing.cleaning import clean_legal_text
 
-
 SECTION_RE = re.compile(r"(?:^|\n)\s*(?:\d+(?:\.\d+)*\.|[A-Z][A-Za-z ]{2,40}\.)\s+")
 SENTENCE_END_RE = re.compile(r"(?<=[.;:!?])\s+")
 

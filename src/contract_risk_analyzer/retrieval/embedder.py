@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class Embedder(Protocol):
-    def fit(self, texts: list[str]) -> "Embedder": ...
+    def fit(self, texts: list[str]) -> Embedder: ...
 
     def encode(self, texts: list[str]) -> np.ndarray: ...
 
@@ -16,7 +16,7 @@ class TfidfEmbedder:
     def __init__(self, max_features: int = 20000) -> None:
         self.vectorizer = TfidfVectorizer(max_features=max_features, lowercase=True, strip_accents="unicode")
 
-    def fit(self, texts: list[str]) -> "TfidfEmbedder":
+    def fit(self, texts: list[str]) -> TfidfEmbedder:
         if not texts:
             raise ValueError("Cannot fit retrieval embedder on empty texts.")
         self.vectorizer.fit(texts)
@@ -36,7 +36,7 @@ class SentenceTransformerEmbedder:
             ) from exc
         self.model = SentenceTransformer(model_name)
 
-    def fit(self, texts: list[str]) -> "SentenceTransformerEmbedder":
+    def fit(self, texts: list[str]) -> SentenceTransformerEmbedder:
         return self
 
     def encode(self, texts: list[str]) -> np.ndarray:
