@@ -1,12 +1,16 @@
 # Contract Risk Analyzer
 
-Contract Risk Analyzer is a production-style NLP system for contract clause classification, semantic clause search, and risk triage. It combines a TF-IDF baseline, optional transformer fine-tuning, rule-based risk scoring, FastAPI deployment, Docker, tests, CI, and documentation.
+Contract Risk Analyzer is a portfolio NLP project for contract document intelligence. It classifies contract clauses, highlights simple risk indicators, retrieves similar clauses, and exposes the workflow through a FastAPI service.
 
-**Disclaimer:** This tool is for document analysis and risk triage only. It is not legal advice and does not replace review by a qualified lawyer.
+The project is intentionally built as an engineering system, not as a notebook demo. The interesting parts are the reproducible data pipeline, a classical baseline, evaluation, error analysis, structured report generation, API layer, Docker setup, tests, CI, and honest documentation about what the model can and cannot do.
 
-## Why This Matters
+**Important disclaimer:** this tool is for document analysis and risk triage only. It is not legal advice and does not replace review by a qualified lawyer.
 
-Contract review is time-consuming and repetitive. NLP can help route clauses, surface potential review points, and retrieve similar provisions, but the output remains assistive. Clause classification and heuristic risk scoring do not establish legal validity, enforceability, or business acceptability.
+## Why I Built This
+
+Contract review has a lot of repetitive structure: termination clauses, governing law, payment terms, indemnification, confidentiality, assignment, and many other recurring provisions. NLP can help organize that text and point a reviewer toward clauses that may deserve attention.
+
+That said, this project does not try to be a legal chatbot or an automatic legal decision maker. It is closer to a document intelligence service: classify the clause, attach confidence, apply transparent rules, and produce a structured report that a human can review.
 
 ## Architecture
 
@@ -21,93 +25,123 @@ flowchart LR
     F --> G[FastAPI]
 ```
 
-## Features
+## What Is Included
 
-- LexGLUE LEDGAR data download and preparation pipeline
-- Optional CUAD preparation extension when public download is available
+- LEDGAR data download and preparation pipeline
+- Optional CUAD preparation path
 - TF-IDF + Logistic Regression baseline
 - Optional Hugging Face transformer training pipeline
-- Evaluation metrics: accuracy, macro F1, micro F1, weighted F1, per-class report, top confusions
-- Rule-based risk scoring with uncertainty handling
-- Semantic clause search with TF-IDF fallback and optional SentenceTransformers
-- FastAPI service with mock-safe startup
+- Evaluation with accuracy, macro F1, micro F1, weighted F1, per-class metrics, and top confusions
+- Rule-based risk scoring on top of model predictions
+- Semantic clause search with a lightweight TF-IDF fallback
+- FastAPI service that can run in mock mode or with a trained local model
 - Docker and docker-compose setup
-- Fast deterministic tests and GitHub Actions CI
-- Model card, dataset notes, error-analysis and benchmark templates
+- Unit tests, API tests, linting, and GitHub Actions CI
+- Model card, dataset notes, error analysis notes, benchmark template, and release notes
 
 ## Dataset
 
-Primary dataset: LexGLUE LEDGAR, a contract provision classification dataset.
-
-No datasets are committed. Download and prepare locally:
+The primary dataset is **LexGLUE LEDGAR**, a public contract provision classification dataset. The repository does not commit raw or processed dataset files. They are generated locally:
 
 ```bash
 python -m pip install -e ".[data]"
-make download-ledgar
+python scripts/download_data.py --dataset ledgar
 ```
 
-Sample data under `data/samples/` is tiny and committed only for tests and demos. CUAD support is optional and documented in [docs/dataset_notes.md](docs/dataset_notes.md).
+The current pipeline normalizes LEDGAR into JSONL splits under `data/processed/`:
+
+- `ledgar_train.jsonl`
+- `ledgar_validation.jsonl`
+- `ledgar_test.jsonl`
+
+Tiny sample files in `data/samples/` are committed only so tests and demos can run without internet access.
 
 ## Modeling
 
-The baseline is TF-IDF + Logistic Regression with optional class balancing. Macro F1 is emphasized because legal clause datasets can be imbalanced and rare classes matter. Transformer fine-tuning is available through:
+The main baseline is TF-IDF plus Logistic Regression. It is simple, fast, reproducible, and useful as a reference point before moving to heavier transformer models.
+
+Macro F1 is tracked because LEDGAR is imbalanced: a model can look good on accuracy while doing poorly on rare clause classes.
+
+Train the baseline after downloading LEDGAR:
 
 ```bash
-make train-transformer-debug
+python scripts/train_baseline.py --config configs/baseline.yaml
 ```
 
-CI does not train transformers or download models.
-
-## Evaluation
-
-Evaluation supports accuracy, macro F1, micro F1, weighted F1, per-class metrics, top confusions, low-confidence examples, and high-confidence wrong predictions. This repository does not include fake LEDGAR metrics. After downloading data and training:
+Optional transformer training is available, but it is intentionally not run in CI:
 
 ```bash
-make train-baseline
-make evaluate
+python scripts/train_transformer.py --config configs/transformer.yaml --max-train-samples 500 --max-eval-samples 200 --epochs 1
 ```
 
-Latest local baseline run on LEDGAR in this workspace:
+## Latest Local Baseline Results
+
+These metrics were produced locally on the real LEDGAR splits:
 
 - validation macro F1: `0.7737`
 - test accuracy: `0.8307`
 - test macro F1: `0.7826`
 - test weighted F1: `0.8332`
 
-These metrics were produced by `python scripts/train_baseline.py --config configs/baseline.yaml` and `python scripts/evaluate_model.py --config configs/baseline.yaml --model models/baseline_tfidf.joblib`. Model weights, processed dataset files, and generated reports are intentionally not committed.
+Commands used:
+
+```bash
+python scripts/train_baseline.py --config configs/baseline.yaml
+python scripts/evaluate_model.py --config configs/baseline.yaml --model models/baseline_tfidf.joblib
+```
+
+The trained model, processed dataset files, and generated reports are not committed. They are local artifacts and are ignored by Git.
+
+## Will It Work For Belarusian Or Russian Documents?
+
+Technically, the service will accept any text. Practically, the trained baseline should **not** be treated as reliable for Belarusian or Russian contracts.
+
+The current model is trained on LEDGAR, which is an English-language contract provision dataset. That means the model has learned English legal drafting patterns and LEDGAR label conventions. Russian-language or Belarusian-language contracts, and contracts governed by Belarusian or Russian law, are a different domain.
+
+For Belarusian or Russian documents, this project would need at least:
+
+- Russian and/or Belarusian contract data
+- a local clause taxonomy
+- jurisdiction-aware risk rules written with legal experts
+- evaluation on representative local documents
+- probably multilingual embeddings or a multilingual transformer model
+
+So the honest answer is: it can be used as an engineering framework, but not as a validated legal-domain model for Belarus or Russia yet.
 
 ## Demo
 
-Run deterministic mock analysis without external data:
+Run a deterministic demo without any trained model:
 
 ```bash
-make analyze-sample
+python scripts/analyze_document.py \
+  --input data/samples/sample_contract.txt \
+  --output data/outputs/risk_report.json \
+  --mock
 ```
 
-Equivalent command:
+Run the same flow with a trained baseline:
 
 ```bash
-python scripts/analyze_document.py --input data/samples/sample_contract.txt --output data/outputs/risk_report.json --mock
+python scripts/analyze_document.py \
+  --input data/samples/sample_contract.txt \
+  --output data/outputs/risk_report_real_model.json \
+  --model models/baseline_tfidf.joblib
 ```
 
-Generated output includes fields like:
+The report contains the document id, predicted clause types, risk flags, severity breakdown, recommendations, overall score, and the legal disclaimer.
 
-```json
-{
-  "document_id": "sample_contract",
-  "summary": "...",
-  "overall_risk_score": 0,
-  "risk_flags": ["..."],
-  "disclaimer": "This tool is for document analysis and risk triage only. It is not legal advice and does not replace review by a qualified lawyer."
-}
-```
+## API
 
-## API Usage
-
-Start the API in mock mode:
+Start in mock mode:
 
 ```bash
-make api
+CONTRACT_RISK_MOCK_MODEL=true uvicorn contract_risk_analyzer.api.main:app --host 0.0.0.0 --port 8000
+```
+
+Start with a trained baseline:
+
+```bash
+CONTRACT_RISK_MOCK_MODEL=false CONTRACT_RISK_MODEL_PATH=models/baseline_tfidf.joblib uvicorn contract_risk_analyzer.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Example requests:
@@ -121,48 +155,62 @@ curl -X POST http://localhost:8000/search/similar -H "Content-Type: application/
 curl http://localhost:8000/metrics
 ```
 
-More examples are in [docs/api_usage.md](docs/api_usage.md).
+More API examples are in [docs/api_usage.md](docs/api_usage.md).
 
 ## Docker
 
 ```bash
-make docker-build
-make docker-run
+docker build -t contract-risk-analyzer:local .
+docker run --rm -p 8000:8000 -e CONTRACT_RISK_MOCK_MODEL=true contract-risk-analyzer:local
 ```
 
 The image does not include datasets, model weights, or retrieval indexes.
 
+## Tests
+
+The test suite is deliberately small and deterministic. It does not require internet access, GPU, Hugging Face downloads, FAISS, or trained model weights.
+
+```bash
+python -m compileall src tests scripts
+python -m pytest -q
+python -m ruff check src tests scripts
+```
+
 ## Limitations
 
-- Not legal advice and not a substitute for a qualified lawyer
-- Models trained on LEDGAR may not generalize to all contracts
-- Legal language varies across jurisdictions and industries
-- Clause classification does not determine legal validity
-- Risk scoring is heuristic and can miss important issues
-- Long clauses, rare labels, boilerplate, and ambiguous wording remain difficult
-- Human review is required
+- This is not legal advice.
+- The risk scoring layer is heuristic.
+- LEDGAR classification is not the same thing as legal validity.
+- The current trained baseline is English-domain only.
+- Belarusian and Russian legal documents are out of domain for the current model.
+- Long clauses, boilerplate, rare labels, and ambiguous provisions remain difficult.
+- Human review is required before making legal or business decisions.
 
 ## Roadmap
 
-- CUAD-based clause extraction task
-- Long-context transformer support
-- Retrieval reranking
-- Calibrated confidence estimates
-- Active learning and human feedback loop
-- Model monitoring and drift checks
-- Multilingual legal-document support
+- Add a real CUAD extraction workflow
+- Try a multilingual model for non-English contracts
+- Add calibrated confidence estimates
+- Add better retrieval reranking
+- Add human feedback loops
+- Add model monitoring and drift checks
+- Build a separate evaluation set for Russian and Belarusian contracts
 
 ---
 
 # Contract Risk Analyzer
 
-Contract Risk Analyzer — это production-style NLP-система для классификации договорных положений, семантического поиска похожих clauses и первичной risk triage-оценки. Проект объединяет TF-IDF baseline, опциональное fine-tuning transformer-модели, rule-based risk scoring, FastAPI, Docker, tests, CI и документацию.
+Contract Risk Analyzer - это портфолио-проект по NLP для анализа договорных документов. Он классифицирует положения договора, подсвечивает простые риск-индикаторы, ищет похожие clauses и отдает результат через FastAPI.
 
-**Дисклеймер:** этот инструмент предназначен только для анализа документов и первичной triage-оценки рисков. Это не юридическая консультация и не замена проверке квалифицированным юристом.
+Я делал этот проект не как notebook-demo, а как небольшую инженерную систему. Здесь важны воспроизводимый data pipeline, baseline-модель, evaluation, error analysis, генерация структурированного отчета, API, Docker, тесты, CI и честное описание ограничений.
 
-## Зачем Этот Проект
+**Важный дисклеймер:** этот инструмент предназначен только для анализа документов и первичной triage-оценки рисков. Это не юридическая консультация и не замена проверке квалифицированным юристом.
 
-Проверка договоров часто занимает много времени и включает повторяющиеся задачи. NLP может помочь классифицировать clauses, подсветить потенциальные точки для проверки и найти похожие положения, но результат остается вспомогательным. Классификация clauses и эвристический risk scoring не определяют юридическую действительность, исполнимость или приемлемость условий для бизнеса.
+## Зачем Это Нужно
+
+В договорах много повторяющейся структуры: termination, governing law, payment terms, indemnification, confidentiality, assignment и другие типовые положения. NLP может помочь разобрать документ на части, классифицировать clauses и показать места, которые стоит внимательнее проверить.
+
+Но это не legal chatbot и не автоматический юрист. Проект решает более приземленную задачу: классифицировать текст, показать confidence, применить прозрачные правила и собрать отчет, который потом смотрит человек.
 
 ## Архитектура
 
@@ -177,95 +225,123 @@ flowchart LR
     F --> G[FastAPI]
 ```
 
-## Возможности
+## Что Есть В Проекте
 
-- Pipeline загрузки и подготовки LexGLUE LEDGAR
-- Опциональное расширение для CUAD, если публичная загрузка доступна
+- Pipeline для загрузки и подготовки LEDGAR
+- Опциональная подготовка CUAD
 - TF-IDF + Logistic Regression baseline
-- Опциональный Hugging Face transformer training pipeline
-- Evaluation metrics: accuracy, macro F1, micro F1, weighted F1, per-class report, top confusions
-- Rule-based risk scoring с учетом uncertainty
-- Semantic clause search с TF-IDF fallback и опциональным SentenceTransformers
-- FastAPI service, который стартует без внешних датасетов и весов модели в mock mode
+- Опциональный pipeline для transformer fine-tuning
+- Evaluation: accuracy, macro F1, micro F1, weighted F1, per-class metrics, top confusions
+- Rule-based risk scoring поверх предсказаний модели
+- Semantic clause search с легким TF-IDF fallback
+- FastAPI service, который работает в mock mode или с обученной локальной моделью
 - Docker и docker-compose
-- Быстрые детерминированные тесты и GitHub Actions CI
-- Model card, dataset notes, error-analysis и benchmark templates
+- Unit tests, API tests, linting и GitHub Actions CI
+- Model card, dataset notes, error analysis notes, benchmark template и release notes
 
 ## Датасет
 
-Основной датасет: LexGLUE LEDGAR, датасет для классификации договорных положений.
-
-Датасеты не коммитятся. Скачивание и подготовка локально:
+Основной датасет - **LexGLUE LEDGAR**, публичный датасет для классификации положений договоров. Raw и processed данные не коммитятся. Они готовятся локально:
 
 ```bash
 python -m pip install -e ".[data]"
-make download-ledgar
+python scripts/download_data.py --dataset ledgar
 ```
 
-Tiny sample data в `data/samples/` используется только для тестов и демо. CUAD поддерживается как опциональное расширение и описан в [docs/dataset_notes.md](docs/dataset_notes.md).
+Pipeline сохраняет LEDGAR в JSONL splits:
+
+- `ledgar_train.jsonl`
+- `ledgar_validation.jsonl`
+- `ledgar_test.jsonl`
+
+Файлы в `data/samples/` маленькие и нужны только для тестов и демо без интернета.
 
 ## Моделирование
 
-Baseline — TF-IDF + Logistic Regression с опциональным class balancing. Macro F1 важен, потому что legal clause datasets могут быть несбалансированными, а редкие классы тоже имеют значение. Transformer fine-tuning доступен через:
+Основной baseline - TF-IDF плюс Logistic Regression. Это простая, быстрая и воспроизводимая модель, с которой удобно сравнивать более тяжелые transformer-подходы.
+
+Macro F1 важен, потому что LEDGAR несбалансирован: accuracy может выглядеть хорошо, даже если модель плохо работает на редких классах.
+
+Обучение baseline после скачивания LEDGAR:
 
 ```bash
-make train-transformer-debug
+python scripts/train_baseline.py --config configs/baseline.yaml
 ```
 
-CI не обучает transformers и не скачивает большие модели.
-
-## Оценка
-
-Evaluation поддерживает accuracy, macro F1, micro F1, weighted F1, per-class metrics, top confusions, low-confidence examples и high-confidence wrong predictions.
-
-После скачивания данных и обучения:
+Transformer training тоже есть, но он не запускается в CI:
 
 ```bash
-make train-baseline
-make evaluate
+python scripts/train_transformer.py --config configs/transformer.yaml --max-train-samples 500 --max-eval-samples 200 --epochs 1
 ```
 
-Последний локальный baseline-прогон на LEDGAR в этом workspace:
+## Последние Локальные Метрики Baseline
+
+Метрики ниже получены локально на реальных LEDGAR splits:
 
 - validation macro F1: `0.7737`
 - test accuracy: `0.8307`
 - test macro F1: `0.7826`
 - test weighted F1: `0.8332`
 
-Эти метрики получены командами `python scripts/train_baseline.py --config configs/baseline.yaml` и `python scripts/evaluate_model.py --config configs/baseline.yaml --model models/baseline_tfidf.joblib`. Веса модели, processed dataset files и generated reports намеренно не коммитятся.
+Команды:
+
+```bash
+python scripts/train_baseline.py --config configs/baseline.yaml
+python scripts/evaluate_model.py --config configs/baseline.yaml --model models/baseline_tfidf.joblib
+```
+
+Обученная модель, processed dataset files и generated reports не коммитятся. Это локальные артефакты, они игнорируются Git.
+
+## Будет Ли Это Работать С Документами Беларуси Или России?
+
+Технически сервис примет любой текст. Практически текущий baseline **нельзя считать надежным** для белорусских или российских договоров.
+
+Модель обучена на LEDGAR, а это англоязычный датасет договорных положений. Значит, модель выучила английские legal drafting patterns и label conventions из LEDGAR. Русскоязычные или белорусскоязычные договоры, а также документы под правом Беларуси или России - это другой домен.
+
+Чтобы делать это нормально для Беларуси или России, нужны:
+
+- русскоязычные и/или белорусскоязычные договорные данные
+- локальная taxonomy clause types
+- jurisdiction-aware risk rules, написанные вместе с юристами
+- evaluation на representative local documents
+- скорее всего, multilingual embeddings или multilingual transformer model
+
+Честный вывод: проект можно использовать как инженерный framework, но текущая модель еще не является валидированной legal-domain моделью для Беларуси или России.
 
 ## Демо
 
-Детерминированный mock-анализ без внешних данных:
+Детерминированное демо без обученной модели:
 
 ```bash
-make analyze-sample
+python scripts/analyze_document.py \
+  --input data/samples/sample_contract.txt \
+  --output data/outputs/risk_report.json \
+  --mock
 ```
 
-Эквивалентная команда:
+Тот же flow с обученным baseline:
 
 ```bash
-python scripts/analyze_document.py --input data/samples/sample_contract.txt --output data/outputs/risk_report.json --mock
+python scripts/analyze_document.py \
+  --input data/samples/sample_contract.txt \
+  --output data/outputs/risk_report_real_model.json \
+  --model models/baseline_tfidf.joblib
 ```
 
-Сгенерированный output содержит поля:
-
-```json
-{
-  "document_id": "sample_contract",
-  "summary": "...",
-  "overall_risk_score": 0,
-  "risk_flags": ["..."],
-  "disclaimer": "This tool is for document analysis and risk triage only. It is not legal advice and does not replace review by a qualified lawyer."
-}
-```
+Отчет содержит document id, predicted clause types, risk flags, severity breakdown, recommendations, overall score и legal disclaimer.
 
 ## API
 
-Запуск API в mock mode:
+Запуск в mock mode:
 
 ```bash
-make api
+CONTRACT_RISK_MOCK_MODEL=true uvicorn contract_risk_analyzer.api.main:app --host 0.0.0.0 --port 8000
+```
+
+Запуск с обученным baseline:
+
+```bash
+CONTRACT_RISK_MOCK_MODEL=false CONTRACT_RISK_MODEL_PATH=models/baseline_tfidf.joblib uvicorn contract_risk_analyzer.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 Примеры запросов:
@@ -279,33 +355,43 @@ curl -X POST http://localhost:8000/search/similar -H "Content-Type: application/
 curl http://localhost:8000/metrics
 ```
 
-Больше примеров — в [docs/api_usage.md](docs/api_usage.md).
+Больше API-примеров есть в [docs/api_usage.md](docs/api_usage.md).
 
 ## Docker
 
 ```bash
-make docker-build
-make docker-run
+docker build -t contract-risk-analyzer:local .
+docker run --rm -p 8000:8000 -e CONTRACT_RISK_MOCK_MODEL=true contract-risk-analyzer:local
 ```
 
-Docker image не включает датасеты, model weights или retrieval indexes.
+Image не включает датасеты, model weights или retrieval indexes.
+
+## Тесты
+
+Тесты маленькие и детерминированные. Им не нужны интернет, GPU, Hugging Face downloads, FAISS или обученные веса модели.
+
+```bash
+python -m compileall src tests scripts
+python -m pytest -q
+python -m ruff check src tests scripts
+```
 
 ## Ограничения
 
-- Не является юридической консультацией и не заменяет квалифицированного юриста
-- Модели, обученные на LEDGAR, могут плохо обобщаться на все типы договоров
-- Юридический язык зависит от юрисдикции и отрасли
-- Классификация clause не определяет юридическую действительность условия
-- Risk scoring является эвристическим и может пропускать важные риски
-- Long clauses, rare labels, boilerplate и ambiguous wording остаются сложными случаями
-- Human review обязателен
+- Это не юридическая консультация.
+- Risk scoring является эвристикой.
+- LEDGAR classification не равна юридической действительности условия.
+- Текущий baseline работает в английском домене.
+- Белорусские и российские юридические документы находятся вне домена текущей модели.
+- Long clauses, boilerplate, rare labels и ambiguous provisions остаются сложными случаями.
+- Перед юридическими или бизнес-решениями нужен human review.
 
 ## Roadmap
 
-- CUAD-based clause extraction task
-- Long-context transformer support
-- Retrieval reranking
-- Calibrated confidence estimates
-- Active learning and human feedback loop
-- Model monitoring and drift checks
-- Multilingual legal-document support
+- Добавить полноценный CUAD extraction workflow
+- Попробовать multilingual model для неанглоязычных договоров
+- Добавить calibrated confidence estimates
+- Улучшить retrieval reranking
+- Добавить human feedback loops
+- Добавить model monitoring и drift checks
+- Собрать отдельный evaluation set для российских и белорусских договоров
