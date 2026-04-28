@@ -65,10 +65,9 @@ class TfidfLogisticBaseline:
         return [str(label) for label in self.pipeline.predict(texts)]
 
     def predict_proba(self, texts: list[str]) -> np.ndarray:
-        classifier = self.pipeline.named_steps["classifier"]
-        if hasattr(classifier, "predict_proba"):
-            return classifier.predict_proba(texts)
-        decision = classifier.decision_function(texts)
+        if hasattr(self.pipeline, "predict_proba"):
+            return self.pipeline.predict_proba(texts)
+        decision = self.pipeline.decision_function(texts)
         exp_scores = np.exp(decision - np.max(decision, axis=1, keepdims=True))
         return exp_scores / exp_scores.sum(axis=1, keepdims=True)
 
