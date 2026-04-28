@@ -28,6 +28,8 @@ def download_ledgar(config_path: str | Path = "configs/data.yaml") -> dict[str, 
     config = load_yaml(config_path)["datasets"]["ledgar"]
     try:
         dataset = _load_hf_dataset(config["hf_path"], config["hf_name"])
+    except DatasetDownloadError:
+        raise
     except Exception as exc:
         raise DatasetDownloadError(
             "Could not download LexGLUE LEDGAR from Hugging Face. "
@@ -46,6 +48,8 @@ def download_cuad(config_path: str | Path = "configs/data.yaml") -> dict[str, An
             split_name = "train" if "train" in dataset else next(iter(dataset.keys()))
             target = write_cuad_split(dataset[split_name], resolve_path(config["output_dir"]), split_name)
             return {"dataset": candidate, "split": split_name, "output": str(target)}
+        except DatasetDownloadError:
+            raise
         except Exception as exc:
             last_error = exc
     raise DatasetDownloadError(
