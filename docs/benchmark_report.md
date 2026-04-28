@@ -48,16 +48,16 @@ Measured with the trained local baseline model unless noted otherwise.
 
 | Measurement | Mean | p95 | Notes |
 | --- | ---: | ---: | --- |
-| Baseline inference per clause | `2.910 ms` | `3.579 ms` | Six sample clauses, model already loaded |
-| Document analysis | `340.812 ms` | `517.520 ms` | Sample contract, includes model loading inside current pipeline |
-| Retrieval index build | `1.400 ms` | n/a | Tiny sample clause set |
-| Retrieval search | `0.547 ms` | `0.778 ms` | TF-IDF retrieval over sample clause set |
-| API `/analyze/clause`, mock mode | `15.685 ms` | `17.375 ms` | FastAPI TestClient, in-process |
-| API `/analyze/clause`, model-backed | `299.818 ms` | `354.676 ms` | FastAPI TestClient, current route loads model per request |
+| Baseline inference per clause | `2.951 ms` | `3.369 ms` | Six sample clauses, model already loaded |
+| Document analysis | `47.431 ms` | `114.984 ms` | Sample contract, cached local model |
+| Retrieval index build | `2.058 ms` | n/a | Tiny sample clause set |
+| Retrieval search | `0.522 ms` | `0.715 ms` | TF-IDF retrieval over sample clause set |
+| API `/analyze/clause`, mock mode | `16.249 ms` | `17.650 ms` | FastAPI TestClient, in-process |
+| API `/analyze/clause`, model-backed | `35.278 ms` | `43.733 ms` | FastAPI TestClient, cached local model after warmup |
 
 ## Interpretation
 
-The baseline model itself is fast once loaded. The model-backed API benchmark is slower because the current API path loads the model from disk during each request. That is acceptable for a portfolio baseline, but a production service should load the model once during application startup and reuse it.
+The baseline model itself is fast once loaded. The API uses lazy local model caching, so the first model-backed request pays the load cost and later requests reuse the same artifact.
 
 The retrieval benchmark is intentionally small because tests and demos must not require a large embedding index. A realistic retrieval benchmark should be repeated on a larger clause corpus.
 
