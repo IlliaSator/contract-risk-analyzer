@@ -10,6 +10,8 @@ The project is intentionally built as an engineering system, not as a notebook d
 
 Contract review has a lot of repetitive structure: termination clauses, governing law, payment terms, indemnification, confidentiality, assignment, and many other recurring provisions. NLP can help organize that text and point a reviewer toward clauses that may deserve attention.
 
+I chose this domain because I have a legal background and wanted to connect it with practical ML engineering. That background helps me frame the problem realistically: the goal is not to automate legal judgment, but to build a careful document analysis workflow with clear boundaries, transparent rules, and human review at the center.
+
 That said, this project does not try to be a legal chatbot or an automatic legal decision maker. It is closer to a document intelligence service: classify the clause, attach confidence, apply transparent rules, and produce a structured report that a human can review.
 
 ## Architecture
@@ -213,6 +215,8 @@ Contract Risk Analyzer - это портфолио-проект по NLP для 
 ## Зачем Это Нужно
 
 В договорах много повторяющейся структуры: termination, governing law, payment terms, indemnification, confidentiality, assignment и другие типовые положения. NLP может помочь разобрать документ на части, классифицировать clauses и показать места, которые стоит внимательнее проверить.
+
+Я выбрал эту тему, потому что у меня есть юридический background, и мне было интересно соединить его с практическим ML engineering. Этот опыт помогает трезво смотреть на задачу: цель проекта не в том, чтобы автоматизировать юридическое суждение, а в том, чтобы построить аккуратный workflow для анализа документов с понятными границами, прозрачными правилами и обязательной human review.
 
 Но это не legal chatbot и не автоматический юрист. Проект решает более приземленную задачу: классифицировать текст, показать confidence, применить прозрачные правила и собрать отчет, который потом смотрит человек.
 
