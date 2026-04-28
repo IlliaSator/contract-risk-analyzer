@@ -1,0 +1,16 @@
+data:
+  train_path: data/processed/ledgar_train.jsonl
+  validation_path: data/processed/ledgar_validation.jsonl
+  test_path: data/processed/ledgar_test.jsonl
+  fallback_sample_path: data/samples/sample_clauses.jsonl
+model:
+  artifact_path: models/baseline_tfidf.joblib
+  max_features: 50000
+  ngram_range: [1, 2]
+  min_df: 2
+  class_weight: balanced
+  random_state: 42
+evaluation:
+  metrics_path: reports/baseline_metrics.json
+  error_analysis_path: reports/error_analysis.json
+  top_confusions_path: reports/top_confusions.json

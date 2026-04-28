@@ -1,0 +1,60 @@
+disclaimer: "This tool is for document analysis and risk triage only. It is not legal advice and does not replace review by a qualified lawyer."
+severity_weights:
+  low: 8
+  medium: 16
+  high: 28
+  critical: 40
+uncertainty:
+  low_confidence_threshold: 0.55
+  penalty: 6
+rules:
+  - flag_type: TERMINATION_RISK
+    severity: high
+    labels: ["termination", "term", "notice"]
+    patterns: ["terminate", "termination", "without cause", "immediate effect"]
+    reason: "Termination language may require closer human review."
+  - flag_type: LIABILITY_RISK
+    severity: critical
+    labels: ["liability", "limitation of liability"]
+    patterns: ["unlimited liability", "consequential damages", "indirect damages", "liquidated damages"]
+    reason: "Liability allocation contains a potential risk indicator."
+  - flag_type: INDEMNIFICATION_RISK
+    severity: high
+    labels: ["indemnification", "indemnity"]
+    patterns: ["indemnify", "hold harmless", "defend"]
+    reason: "Indemnification obligations may require closer review."
+  - flag_type: CONFIDENTIALITY_RISK
+    severity: medium
+    labels: ["confidentiality", "non-disclosure"]
+    patterns: ["confidential information", "trade secret", "non-disclosure"]
+    reason: "Confidentiality obligations should be validated against business expectations."
+  - flag_type: GOVERNING_LAW_RISK
+    severity: medium
+    labels: ["governing law", "jurisdiction"]
+    patterns: ["governed by", "exclusive jurisdiction", "venue"]
+    reason: "Governing law or forum language may affect review requirements."
+  - flag_type: ASSIGNMENT_RISK
+    severity: medium
+    labels: ["assignment"]
+    patterns: ["assign", "assignment", "without consent"]
+    reason: "Assignment restrictions or permissions may require review."
+  - flag_type: PAYMENT_RISK
+    severity: medium
+    labels: ["payment", "fees"]
+    patterns: ["late payment", "interest", "invoice", "non-refundable"]
+    reason: "Payment terms contain indicators that may require operational review."
+  - flag_type: EXCLUSIVITY_RISK
+    severity: high
+    labels: ["exclusivity"]
+    patterns: ["exclusive", "sole provider", "not engage"]
+    reason: "Exclusivity terms can create business constraints."
+  - flag_type: CHANGE_OF_CONTROL_RISK
+    severity: high
+    labels: ["change of control"]
+    patterns: ["change of control", "merger", "acquisition"]
+    reason: "Change-of-control language may affect transaction flexibility."
+  - flag_type: NON_COMPETE_RISK
+    severity: critical
+    labels: ["non-compete", "non competition"]
+    patterns: ["non-compete", "compete with", "competitive business"]
+    reason: "Non-compete obligations are jurisdiction-sensitive and require human review."

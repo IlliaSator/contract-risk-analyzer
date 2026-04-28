@@ -1,0 +1,7 @@
+embedder:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  fallback: tfidf
+index:
+  output_dir: models/retrieval
+  metric: cosine
+  top_k: 5

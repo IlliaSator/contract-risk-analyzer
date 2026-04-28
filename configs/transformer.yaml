@@ -1,0 +1,16 @@
+data:
+  train_path: data/processed/ledgar_train.jsonl
+  validation_path: data/processed/ledgar_validation.jsonl
+  test_path: data/processed/ledgar_test.jsonl
+model:
+  model_name: distilbert-base-uncased
+  output_dir: models/transformer
+  max_length: 256
+training:
+  epochs: 3
+  batch_size: 8
+  learning_rate: 0.00002
+  weight_decay: 0.01
+  random_state: 42
+evaluation:
+  metrics_path: reports/transformer_metrics.json

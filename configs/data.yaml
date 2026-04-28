@@ -1,0 +1,14 @@
+datasets:
+  ledgar:
+    hf_path: coastalcph/lex_glue
+    hf_name: ledgar
+    output_dir: data/processed
+  cuad:
+    hf_candidates:
+      - theatticusproject/cuad
+      - cuad
+    output_dir: data/processed
+  sample:
+    input: data/samples/sample_clauses.jsonl
+    output_dir: data/processed
+random_state: 42

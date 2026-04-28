@@ -1,0 +1,6 @@
+service:
+  title: Contract Risk Analyzer
+  version: 0.1.0
+  mock_model_env: CONTRACT_RISK_MOCK_MODEL
+  model_path_env: CONTRACT_RISK_MODEL_PATH
+  retrieval_index_env: CONTRACT_RISK_RETRIEVAL_INDEX
